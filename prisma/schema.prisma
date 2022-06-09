@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Char(36)
+  password  String   @db.VarChar(60)
+  email     String   @unique
+  name      String
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(6)
+  fact      Fact[]   @relation("UserFact")
+}
+
+model Status {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Char(36)
+  verified  Boolean
+  sentCount Int
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(6)
+  fact      Fact[]   @relation("UserStatus")
+}
+
+model Fact {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Char(36)
+  userId    String   @db.Char(36)
+  user      User     @relation("UserFact", fields: [userId], references: [id])
+  statusId  String   @db.Char(36)
+  status    Status   @relation("UserStatus", fields: [statusId], references: [id])
+  text      String   @db.Text
+  source    String
+  type      String
+  deleted   Boolean
+  used      Boolean
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(6)
+}
